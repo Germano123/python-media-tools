@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Tools HUB</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Fontes do Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral (Sidebar) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">💜</span>
+                    <h1>Media HUB</h1>
+                </div>
+                <p class="tagline">Ferramentas locais de mídia</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul id="widget-tabs">
+                    <!-- Abas dos scripts serão injetadas dinamicamente aqui -->
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>Status do Servidor: <span id="server-status" class="status offline">Desconectado</span></p>
+            </div>
+        </aside>
+
+        <!-- Área Principal (Main Workspace) -->
+        <main class="main-content">
+            <header class="main-header">
+                <h2 id="active-tool-title">Selecione uma Ferramenta</h2>
+                <p id="active-tool-desc">Escolha um script no menu lateral para começar.</p>
+            </header>
+
+            <section class="workspace-area">
+                <!-- Conteúdo do widget ativo será renderizado aqui -->
+                <div id="widget-container" class="widget-card">
+                    <div class="empty-state">
+                        <div class="empty-icon">🛠️</div>
+                        <h3>Bem-vindo ao Media Tools HUB</h3>
+                        <p>Todos os seus scripts de mídia unificados em um só lugar direto no seu navegador local.</p>
+                        <p class="hint">Escolha uma opção à esquerda para iniciar o processamento de áudio, vídeo ou imagens.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Core do HUB -->
+    <script src="main.js"></script>
+
+    <!-- HUB WIDGETS:
+         Você pode inserir ou remover scripts comentando/descomentando as tags abaixo.
+         Cada script se registra no HUB de forma totalmente autônoma.
+    -->
+    <script src="widgets/audio_cutter.js"></script>
+    <script src="widgets/gif_converter.js"></script>
+    <script src="widgets/video_merger.js"></script>
+    <script src="widgets/pdf_converter.js"></script>
+    <script src="widgets/video_downloader.js"></script>
+</body>
+</html>
+
