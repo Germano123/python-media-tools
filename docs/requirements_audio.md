@@ -105,3 +105,27 @@ Este documento apresenta o detalhamento de engenharia e os requisitos para as fe
     *   Opção para remoção de metadados ("Sanitização").
 *   **Critérios de Aceite**:
     *   As informações alteradas pelo usuário devem refletir nos leitores de mídia nativos dos sistemas operacionais (Windows Explorer, macOS Finder).
+
+---
+
+## AUD-008: Transcriber (Extração de Áudio e Transcrição em Texto / Legendas)
+
+*   **Objetivo**: Receber arquivos de vídeo ou áudio locais (ou links do YouTube), extrair automaticamente a faixa de áudio e realizar o reconhecimento de fala (ASR), gerando transcrições em texto puro, legendas sincronizadas (SRT, WebVTT) e metadados estruturados em JSON.
+*   **Formatos de Entrada**: Vídeos (`.mp4`, `.mov`, `.avi`, `.mkv`, `.webm`) ou Áudios (`.mp3`, `.wav`, `.m4a`, `.ogg`, `.flac`) ou URL do YouTube.
+*   **Formatos de Saída**: `.txt` (texto corrido), `.srt` (legendas SubRip), `.vtt` (legendas WebVTT), `.json` (segmentos, timestamps por palavra e confiança) e pacote `.zip` consolidado.
+*   **Processamento no Backend**:
+    *   Extração e normalização do fluxo de áudio para WAV PCM 16kHz mono via FFmpeg embutido (`imageio-ffmpeg`).
+    *   Transcrição com rede neural acelerada via `faster-whisper` (CTranslate2) com suporte a GPU NVIDIA CUDA e fallback para CPU.
+    *   Filtro de atividade de voz (VAD) para ignorar trechos em silêncio e alucinações.
+*   **Interface Requerida**:
+    *   Upload por Drag & Drop para vídeos e áudios.
+    *   Seletor de arquivos já presentes em `data/inputs/`.
+    *   Campo para URL do YouTube.
+    *   Seletor de modelo Whisper (`tiny`, `base`, `small`, `medium`, `large-v3`).
+    *   Seletor de idioma falado e modo de tarefa (transcrição direta vs tradução para inglês).
+    *   Badge de monitoramento em tempo real do hardware (GPU CUDA vs CPU).
+    *   Visualizador integrado com abas para Texto Puro, Legenda SRT e Segmentos Cronometrados, botões de cópia rápida e grade de downloads.
+*   **Critérios de Aceite**:
+    *   Deve processar mídias sem exigir instalação manual do executável FFmpeg no PATH do sistema operacional.
+    *   O arquivo SRT e VTT gerado deve possuir timestamps válidos e sincronizados com a fala.
+    *   O usuário deve poder baixar os formatos individuais ou o arquivo ZIP consolidado.

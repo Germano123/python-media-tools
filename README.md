@@ -26,8 +26,14 @@ O projeto foi projetado com uma arquitetura flexível onde ferramentas (widgets 
 
 
 5. **📄 Downloader de vídeos do YouTube**:
-   - Faz donwload de links do YouTube.
+   - Faz download de links do YouTube.
    - Revisa links de playlist com múltipla seleção de downloads.
+
+6. **🎙️ Transcrição & Legendas (Speech-to-Text)**:
+   - Extrai automaticamente a faixa de áudio de arquivos de vídeo (`.mp4`, `.mov`, `.mkv`, etc.) ou áudio (`.mp3`, `.wav`, `.m4a`, etc.) e links do YouTube.
+   - Realiza transcrição neural com `faster-whisper` acelerado via GPU NVIDIA (CUDA) ou CPU.
+   - Exporta transcrição em texto puro (`.txt`), legendas (`.srt` e `.vtt`), metadados estruturados (`.json`) e pacote compactado (`.zip`).
+   - Suporta múltiplos modelos (`tiny`, `base`, `small`, `medium`, `large-v3`), detecção automática de idioma e filtro de voz (VAD).
 
 ---
 
@@ -67,7 +73,8 @@ O projeto é dividido de forma limpa entre o backend de processamento de mídia 
 ### Pré-requisitos
 
 1. **Python 3.10+** instalado.
-2. **FFmpeg** instalado no sistema operacional e adicionado ao seu `PATH` global (necessário para o cortador de áudio e mesclador de vídeos).
+2. O binário do **FFmpeg** é gerenciado automaticamente pelo projeto através do pacote `imageio-ffmpeg` (não é necessário configurar o FFmpeg manualmente nas variáveis de ambiente do Windows).
+3. *(Opcional)* Placa de vídeo NVIDIA (GeForce RTX/GTX) para aceleração de transcrição por GPU via CUDA. Se não houver GPU, o sistema utilizará a CPU automaticamente.
 
 ### Configuração e Execução
 
@@ -88,6 +95,16 @@ O projeto é dividido de forma limpa entre o backend de processamento de mídia 
    ```
 
 O navegador abrirá automaticamente em `http://127.0.0.1:5000/`.
+
+### Problemas ao baixar do YouTube
+
+O projeto usa `yt-dlp` para obter os arquivos de mídia; não usa a YouTube Data API para o download. Para instalar a versão definida pelo projeto, execute novamente `python -m pip install -r requirements.txt`. Para investigar uma falha, rode:
+
+```bash
+python -m yt_dlp -v "URL_DO_VIDEO"
+```
+
+Um HTTP 403 pode indicar mudanças recentes no YouTube, restrição de acesso ao vídeo ou bloqueio temporário de rede/IP. Se o vídeo exigir login, use cookies da sua própria sessão conforme a documentação do `yt-dlp` e não compartilhe esses cookies. Uma falha de quota da YouTube Data API é um problema diferente.
 
 ---
 

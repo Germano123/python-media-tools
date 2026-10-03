@@ -2,6 +2,20 @@
 
 Todas as mudanças relevantes deste projeto serão documentadas neste arquivo.
 
+## [1.2.0] - 2026-10-02
+
+### Adicionado
+- **Nova Ferramenta - Transcrição & Legendas (Speech-to-Text)**:
+  - Novo serviço [`backend/services/transcriber.py`](file:///c:/Users/Germano/Documents/projects/sideprojects/python-media-tools/backend/services/transcriber.py) baseado em `faster-whisper` (CTranslate2) com detecção automática de aceleração GPU NVIDIA (CUDA) e fallback transparente para CPU.
+  - Extração de áudio e normalização automática para PCM 16kHz mono a partir de qualquer mídia (vídeo ou áudio).
+  - Geração automática de 5 formatos: Texto puro (`.txt`), Legendas SubRip (`.srt`), Legendas WebVTT (`.vtt`), JSON com timestamps por palavra e pacote consolidado (`.zip`).
+  - Novos endpoints na API Flask: `GET /api/transcriber/info` e `POST /api/transcriber/transcribe`.
+  - Novo widget frontend [`frontend/widgets/transcriber.js`](file:///c:/Users/Germano/Documents/projects/sideprojects/python-media-tools/frontend/widgets/transcriber.js) com seleção de modelo Whisper (`tiny`, `base`, `small`, `medium`, `large-v3`), detecção/tradução de idiomas, filtro de voz (VAD), abas de visualização rápida e botões de cópia e download.
+  - Registro da especificação `AUD-008` em [`docs/requirements_audio.md`](file:///c:/Users/Germano/Documents/projects/sideprojects/python-media-tools/docs/requirements_audio.md).
+- **Módulo Centralizado de FFmpeg**:
+  - Criação de [`backend/services/ffmpeg_utils.py`](file:///c:/Users/Germano/Documents/projects/sideprojects/python-media-tools/backend/services/ffmpeg_utils.py) para unificar a resolução do binário do FFmpeg, utilizando o executável portátil de `imageio-ffmpeg` sem depender de configuração manual no PATH do Windows.
+  - Refatoração de [`backend/services/audio_cutter.py`](file:///c:/Users/Germano/Documents/projects/sideprojects/python-media-tools/backend/services/audio_cutter.py) para utilizar o executável unificado do FFmpeg.
+
 ## [1.1.0] - 2026-08-19
 
 ### Adicionado

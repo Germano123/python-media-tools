@@ -539,3 +539,102 @@ textarea:focus {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Estilos Específicos para o Transcritor */
+.badge-hw {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.badge-hw.cuda {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.badge-hw.cpu {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.transcription-nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+.transcription-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.transcription-tab-btn:hover {
+    color: var(--purple-main);
+    background: var(--purple-light);
+}
+.transcription-tab-btn.active {
+    color: var(--purple-main);
+    background: var(--purple-light);
+}
+
+.transcription-box {
+    width: 100%;
+    min-height: 220px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-dark);
+    white-space: pre-wrap;
+    resize: vertical;
+}
+
+.segments-list {
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.segment-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+}
+.segment-timestamp {
+    font-family: monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--purple-main);
+    white-space: nowrap;
+}
+.segment-text {
+    color: var(--text-dark);
+}
+
+.download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}

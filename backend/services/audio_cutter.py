@@ -3,6 +3,11 @@ import subprocess
 from pathlib import Path
 from yt_dlp import YoutubeDL
 
+try:
+    from .ffmpeg_utils import run_ffmpeg
+except ImportError:
+    from services.ffmpeg_utils import run_ffmpeg
+
 
 def time_to_seconds(t: str) -> int:
     if isinstance(t, (int, float)):
@@ -22,8 +27,7 @@ def time_to_seconds(t: str) -> int:
 def convert_mp4_to_mp3(input_file: Path, output_file: Path):
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    cmd = [
-        "ffmpeg",
+    args = [
         "-y",
         "-i", str(input_file),
         "-vn",
@@ -32,7 +36,7 @@ def convert_mp4_to_mp3(input_file: Path, output_file: Path):
         str(output_file),
     ]
 
-    subprocess.run(cmd, check=True)
+    run_ffmpeg(args, check=True)
 
 
 def download_from_youtube(url: str, output_mp3: Path):
@@ -42,7 +46,6 @@ def download_from_youtube(url: str, output_mp3: Path):
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": str(temp_template),
-        "nocheckcertificate": True,
     }
 
     with YoutubeDL(ydl_opts) as ydl:
@@ -51,8 +54,8 @@ def download_from_youtube(url: str, output_mp3: Path):
 
     # Convert the downloaded temp audio file to mp3
     try:
-        subprocess.run([
-            "ffmpeg", "-y",
+        run_ffmpeg([
+            "-y",
             "-i", str(temp_file),
             "-vn",
             "-acodec", "libmp3lame",
@@ -92,19 +95,18 @@ def cut_audio(audio_path: Path, chapters: list, output_dir: Path):
 
         output_file = output_dir / f"{chapter['name']}.mp3"
 
-        cmd = [
-            "ffmpeg",
+        args = [
             "-y",
             "-i", str(audio_path),
             "-ss", str(start),
         ]
 
         if end:
-            cmd += ["-to", str(end)]
+            args += ["-to", str(end)]
 
-        cmd += ["-c", "copy", str(output_file)]
+        args += ["-c", "copy", str(output_file)]
 
-        subprocess.run(cmd, check=True)
+        run_ffmpeg(args, check=True)
         created_files.append(output_file)
 
     return created_files

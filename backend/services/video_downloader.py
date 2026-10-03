@@ -9,7 +9,6 @@ def get_url_metadata(url: str) -> dict:
     ydl_opts = {
         'extract_flat': 'in_playlist',
         'skip_download': True,
-        'nocheckcertificate': True,
     }
     
     with YoutubeDL(ydl_opts) as ydl:
@@ -56,7 +55,6 @@ def download_single_video(url: str, output_dir: Path) -> Path:
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': str(output_dir / '%(title)s.%(ext)s'),
         'merge_output_format': 'mp4',
-        'nocheckcertificate': True,
     }
 
     

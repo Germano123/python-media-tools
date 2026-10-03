@@ -15,6 +15,7 @@ from services.gif_converter import video_to_gif
 from services.video_merger import merge_video_paths
 from services.pdf_converter import images_to_pdf
 from services.video_downloader import get_url_metadata, download_single_video
+from services.transcriber import transcribe_media_file, get_hardware_status
 
 
 
@@ -65,10 +66,11 @@ def serve_output(filepath):
 # Listar arquivos na pasta inputs
 @app.route("/api/inputs", methods=["GET"])
 def list_inputs():
-    media_type = request.args.get("type", "all") # all, audio, video, image
+    media_type = request.args.get("type", "all") # all, audio, video, image, media
     
-    audio_exts = {".mp3", ".wav", ".m4a", ".mp4"}
-    video_exts = {".mp4", ".mov", ".avi", ".mkv", ".webm"}
+    audio_exts = {".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac", ".wma", ".opus"}
+    video_exts = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".ts", ".m4v"}
+    media_exts = audio_exts.union(video_exts)
     image_exts = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tiff"}
     
     files = []
@@ -79,7 +81,9 @@ def list_inputs():
                 is_match = False
                 if media_type == "all":
                     is_match = True
-                elif media_type == "audio" and ext in audio_exts:
+                elif media_type == "media" and ext in media_exts:
+                    is_match = True
+                elif media_type == "audio" and (ext in audio_exts or ext == ".mp4"):
                     is_match = True
                 elif media_type == "video" and ext in video_exts:
                     is_match = True
@@ -373,6 +377,100 @@ def api_video_download():
         "files": downloaded_files,
         "errors": errors
     })
+
+
+# API: Status de Hardware e Modelos do Transcritor
+@app.route("/api/transcriber/info", methods=["GET"])
+def api_transcriber_info():
+    try:
+        info = get_hardware_status()
+        return jsonify(info)
+    except Exception as e:
+        return jsonify({"error": f"Erro ao verificar hardware: {str(e)}"}), 500
+
+
+# API: Transcrição e Extração de Áudio
+@app.route("/api/transcriber/transcribe", methods=["POST"])
+def api_transcriber_transcribe():
+    cleanup_input = False
+    input_path = None
+
+    if 'file' in request.files:
+        media_file = request.files['file']
+        if media_file.filename == '':
+            return jsonify({"error": "Nenhum arquivo enviado"}), 400
+        temp_input = TEMP_DIR / f"transcribe_input_{int(time.time())}_{media_file.filename}"
+        media_file.save(str(temp_input))
+        input_path = temp_input
+        cleanup_input = True
+        
+        model_size = request.form.get("model_size", "base")
+        language = request.form.get("language")
+        task = request.form.get("task", "transcribe")
+        word_timestamps = request.form.get("word_timestamps", "true").lower() == "true"
+        vad_filter = request.form.get("vad_filter", "true").lower() == "true"
+    else:
+        data = request.json or {}
+        youtube_url = data.get("youtube_url")
+        media_filename = data.get("media_file")
+
+        if youtube_url:
+            yt_filename = f"yt_audio_{int(time.time())}.mp3"
+            dest_mp3 = INPUTS_DIR / yt_filename
+            try:
+                download_from_youtube(youtube_url, dest_mp3)
+                input_path = dest_mp3
+            except Exception as e:
+                return jsonify({"error": f"Falha ao baixar áudio do YouTube: {str(e)}"}), 500
+        elif media_filename:
+            input_path = INPUTS_DIR / media_filename
+        else:
+            return jsonify({"error": "Envie um arquivo, selecione um arquivo de inputs ou informe uma URL do YouTube."}), 400
+
+        model_size = data.get("model_size", "base")
+        language = data.get("language")
+        task = data.get("task", "transcribe")
+        word_timestamps = data.get("word_timestamps", True)
+        vad_filter = data.get("vad_filter", True)
+
+    if not input_path or not input_path.exists():
+        return jsonify({"error": "Arquivo de mídia não encontrado para processamento."}), 404
+
+    safe_stem = "".join(c for c in input_path.stem if c.isalnum() or c in ("-", "_")).strip() or "media"
+    output_subdir = OUTPUTS_DIR / "transcriptions" / safe_stem
+    output_subdir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        result = transcribe_media_file(
+            input_path=input_path,
+            output_dir=output_subdir,
+            temp_dir=TEMP_DIR,
+            model_size=model_size,
+            language=language if language and language != "auto" else None,
+            task=task,
+            word_timestamps=word_timestamps,
+            vad_filter=vad_filter
+        )
+
+        files_map = result["files"]
+        urls = {
+            "txt_url": f"/api/outputs/transcriptions/{safe_stem}/{files_map['txt']}",
+            "srt_url": f"/api/outputs/transcriptions/{safe_stem}/{files_map['srt']}",
+            "vtt_url": f"/api/outputs/transcriptions/{safe_stem}/{files_map['vtt']}",
+            "json_url": f"/api/outputs/transcriptions/{safe_stem}/{files_map['json']}",
+            "zip_url": f"/api/outputs/transcriptions/{safe_stem}/{files_map['zip']}",
+        }
+        result["urls"] = urls
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": f"Erro durante a transcrição: {str(e)}"}), 500
+    finally:
+        if cleanup_input and input_path and input_path.exists():
+            try:
+                input_path.unlink()
+            except Exception:
+                pass
 
 
 # Servir arquivos estáticos do frontend (CSS, JS, widgets, etc.) - Deve ser a última rota
